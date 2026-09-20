@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#cc0000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Target List">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+  <title>Target List</title>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">TARGET RUN</div>
+      <h1>Shopping List</h1>
+    </div>
+    <button id="newListBtn" class="icon-btn" aria-label="Create new list">＋</button>
+  </header>
+
+  <main>
+    <section class="card hero">
+      <div class="list-title-row">
+        <input id="listName" aria-label="List name" value="My Target Run">
+        <button id="shareBtn" class="ghost-btn">Share</button>
+      </div>
+      <div class="progress"><span id="progressBar"></span></div>
+      <div class="stats"><span id="progressText">0 of 0 items</span><button id="clearDoneBtn" class="text-btn">Clear completed</button></div>
+    </section>
+
+    <section class="card add-card">
+      <div class="add-row">
+        <input id="itemInput" placeholder="Add an item…" autocomplete="off">
+        <button id="addBtn" class="primary-btn">Add</button>
+      </div>
+      <div class="quick-add">
+        <button data-quick="Milk">Milk</button><button data-quick="Eggs">Eggs</button>
+        <button data-quick="Paper towels">Paper towels</button><button data-quick="Laundry detergent">Laundry detergent</button>
+      </div>
+    </section>
+
+    <section class="toolbar">
+      <div class="segmented">
+        <button class="filter active" data-filter="all">All</button>
+        <button class="filter" data-filter="open">Open</button>
+        <button class="filter" data-filter="done">Done</button>
+      </div>
+      <select id="categoryFilter" aria-label="Filter by category">
+        <option value="All">All categories</option>
+        <option>Grocery</option><option>Household</option><option>Personal Care</option>
+        <option>Beauty</option><option>Electronics</option><option>Pets</option><option>Other</option>
+      </select>
+    </section>
+
+    <section id="list" class="items"></section>
+
+    <section class="card tips">
+      <strong>Shopping tip</strong>
+      <p>Tap the Target button on an item to search Target for it. Your list is saved on this device.</p>
+    </section>
+  </main>
+
+  <template id="itemTemplate">
+    <article class="item">
+      <button class="check" aria-label="Mark complete">✓</button>
+      <div class="item-main">
+        <div class="item-name"></div>
+        <div class="meta"><span class="category"></span><span class="qty"></span></div>
+      </div>
+      <button class="target-btn">Target</button>
+      <button class="more-btn" aria-label="Edit item">•••</button>
+    </article>
+  </template>
+
+  <dialog id="editDialog">
+    <form method="dialog" class="dialog-card">
+      <h2>Edit item</h2>
+      <label>Name<input id="editName"></label>
+      <label>Category<select id="editCategory">
+        <option>Grocery</option><option>Household</option><option>Personal Care</option>
+        <option>Beauty</option><option>Electronics</option><option>Pets</option><option>Other</option>
+      </select></label>
+      <label>Quantity<input id="editQty" type="number" min="1" value="1"></label>
+      <div class="dialog-actions">
+        <button value="cancel" class="ghost-btn">Cancel</button>
+        <button id="deleteBtn" value="delete" class="danger-btn">Delete</button>
+        <button id="saveBtn" value="save" class="primary-btn">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
