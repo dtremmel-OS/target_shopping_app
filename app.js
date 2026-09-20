@@ -1,9 +1,312 @@
-const K="target-list-v2";const ID=()=>crypto.randomUUID();let S=JSON.parse(localStorage.getItem(K)||"null")||{lists:[{id:ID(),name:"My Target Run",budget:0,items:[]}],current:null,filter:"all",cat:"All",defaultCat:"Grocery"};S.current=S.current||S.lists[0].id;let eid=null;const $=x=>document.querySelector(x),cur=()=>S.lists.find(x=>x.id===S.current),save=()=>localStorage.setItem(K,JSON.stringify(S));
-function add(n){n=n.trim();if(!n)return;cur().items.push({id:ID(),name:n,cat:S.defaultCat,qty:1,price:0,aisle:"",note:"",done:false,fav:false});save();render()}
-function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
-function render(){let l=cur();$("#listName").value=l.name;let a=l.items.filter(x=>(S.filter=="all"||S.filter=="open"&&!x.done||S.filter=="done"&&x.done)&&(S.cat=="All"||x.cat==S.cat));$("#items").innerHTML=a.map(x=>`<div class="item ${x.done?"done":""}"><button class="check" data-c="${x.id}">✓</button><div class="main"><div class="name">${esc(x.name)}</div><div class="meta">${esc(x.cat)} · ×${x.qty}${x.aisle?" · "+esc(x.aisle):""}${x.note?" · "+esc(x.note):""}${x.price?" · $"+(x.price*x.qty).toFixed(2):""}</div></div><button class="star" data-s="${x.id}">${x.fav?"★":"☆"}</button><button class="target" data-t="${x.id}">Target</button><button class="more" data-e="${x.id}">•••</button></div>`).join("");a.forEach(x=>{$(`[data-c="${x.id}"]`).onclick=()=>{x.done=!x.done;save();render()};$(`[data-s="${x.id}"]`).onclick=()=>{x.fav=!x.fav;save();render()};$(`[data-t="${x.id}"]`).onclick=()=>open("https://www.target.com/s?searchTerm="+encodeURIComponent(x.name),"_blank");$(`[data-e="${x.id}"]`).onclick=()=>edit(x.id)});let done=l.items.filter(x=>x.done).length,total=l.items.length,spent=l.items.reduce((n,x)=>n+x.price*x.qty,0);$("#stats").textContent=`${done} of ${total} items · $${spent.toFixed(2)}`;$("#bar").style.width=total?done/total*100+"%":"0%";$("#budget").value=l.budget||"";$("#bt").textContent=`$${spent.toFixed(2)} / $${Number(l.budget||0).toFixed(2)}`;$("#left").textContent=l.budget?`$${(l.budget-spent).toFixed(2)} left`:"";$("#bb").style.width=l.budget?Math.min(100,spent/l.budget*100)+"%":"0%";lists();favs()}
-function edit(i){eid=i;let x=cur().items.find(a=>a.id===i);$("#en").value=x.name;$("#ec").value=x.cat;$("#eq").value=x.qty;$("#ep").value=x.price;$("#ea").value=x.aisle;$("#note").value=x.note;$("#fav").checked=x.fav;$("#edit").showModal()}
-function lists(){$("#listCards").innerHTML=S.lists.map(l=>`<div class="listcard"><div><b>${esc(l.name)}</b><div class="meta">${l.items.filter(x=>!x.done).length} open · ${l.items.length} total</div></div><button data-o="${l.id}">Open</button></div>`).join("");document.querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>{S.current=b.dataset.o;save();view("shop");render()})}
-function favs(){let f=S.lists.flatMap(l=>l.items.filter(x=>x.fav).map(x=>({...x,list:l.name})));$("#favCards").innerHTML=f.length?f.map(x=>`<div class="listcard"><div><b>${esc(x.name)}</b><div class="meta">${esc(x.list)} · ${esc(x.cat)}</div></div><button class="target" data-fav="${esc(x.name)}">Target</button></div>`).join(""):"<div class='card muted'>No favorites yet. Tap ☆ beside an item to save it.</div>";document.querySelectorAll("[data-fav]").forEach(b=>b.onclick=()=>open("https://www.target.com/s?searchTerm="+encodeURIComponent(b.dataset.fav),"_blank"))}
-function view(v){document.querySelectorAll(".view").forEach(x=>x.classList.add("hidden"));$("#"+v).classList.remove("hidden");document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.dataset.v==v))}
-$("#add").onclick=()=>{add($("#item").value);$("#item").value=""};$("#item").onkeydown=e=>e.key=="Enter"&&$("#add").click();document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>add(b.dataset.add));document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>view(b.dataset.v));document.querySelectorAll(".f").forEach(b=>b.onclick=()=>{S.filter=b.dataset.f;document.querySelectorAll(".f").forEach(x=>x.classList.remove("active"));b.classList.add("active");render()});$("#cat").onchange=e=>{S.cat=e.target.value;render()};$("#listName").onchange=e=>{cur().name=e.target.value||"My Target Run";save();render()};$("#budget").onchange=e=>{cur().budget=Number(e.target.value)||0;save();render()};$("#clear").onclick=()=>{cur().items=cur().items.filter(x=>!x.done);save();render()};$("#share").onclick=async()=>{let t=cur().name+"\n"+cur().items.map(x=>`${x.done?"☑":"☐"} ${x.name} ×${x.qty}`).join("\n");navigator.share?await navigator.share({title:cur().name,text:t}):navigator.clipboard.writeText(t)};$("#newList").onclick=()=>{let n=prompt("New list name","Weekly Target Run");if(n){S.lists.push({id:ID(),name:n,budget:0,items:[]});S.current=S.lists.at(-1).id;save();render()}};$("#dup").onclick=()=>{let l=cur();S.lists.push({id:ID(),name:l.name+" Copy",budget:l.budget,items:l.items.map(x=>({...x,id:ID(),done:false}))});S.current=S.lists.at(-1).id;save();render()};$("#save").onclick=()=>{let x=cur().items.find(a=>a.id===eid);Object.assign(x,{name:$("#en").value.trim()||x.name,cat:$("#ec").value,qty:Math.max(1,Number($("#eq").value)||1),price:Math.max(0,Number($("#ep").value)||0),aisle:$("#ea").value.trim(),note:$("#note").value.trim(),fav:$("#fav").checked});save();render()};$("#del").onclick=()=>{cur().items=cur().items.filter(x=>x.id!==eid);save();render()};$("#defaultCat").value=S.defaultCat;$("#defaultCat").onchange=e=>{S.defaultCat=e.target.value;save()};$("#reset").onclick=()=>confirm("Reset all app data?")&&(localStorage.removeItem(K),location.reload());if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");render();
+const K="target-list-v2";
+const ID=()=>crypto.randomUUID();
+let S=JSON.parse(localStorage.getItem(K)||"null")||{
+  lists:[{id:ID(),name:"My Target Run",budget:0,items:[]}],
+  current:null,filter:"all",cat:"All",defaultCat:"Grocery"
+};
+S.current=S.current||S.lists[0].id;
+let eid=null;
+
+const $=x=>document.querySelector(x);
+const cur=()=>S.lists.find(x=>x.id===S.current);
+const save=()=>localStorage.setItem(K,JSON.stringify(S));
+
+function esc(s){
+  return String(s).replace(/[&<>"']/g,m=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[m]));
+}
+
+function add(n){
+  n=n.trim();
+  if(!n)return;
+  cur().items.push({
+    id:ID(),name:n,cat:S.defaultCat,qty:1,price:0,aisle:"",
+    note:"",done:false,fav:false
+  });
+  save();
+  render();
+}
+
+function render(){
+  const l=cur();
+  $("#listName").value=l.name;
+
+  const a=l.items.filter(x=>
+    (S.filter==="all" ||
+     (S.filter==="open"&&!x.done) ||
+     (S.filter==="done"&&x.done)) &&
+    (S.cat==="All"||x.cat===S.cat)
+  );
+
+  $("#items").innerHTML=a.map(x=>`
+    <div class="item ${x.done?"done":""}">
+      <button class="check" data-c="${x.id}" aria-label="${x.done?"Mark open":"Mark done"}">✓</button>
+      <button class="item-main" data-e="${x.id}" aria-label="Edit ${esc(x.name)}">
+        <span class="name">${esc(x.name)}</span>
+        <span class="meta">${esc(x.cat)} · ×${x.qty}${x.aisle?" · "+esc(x.aisle):""}${x.note?" · "+esc(x.note):""}${x.price?" · $"+(x.price*x.qty).toFixed(2):""}</span>
+      </button>
+      <button class="star" data-s="${x.id}" aria-label="${x.fav?"Remove favorite":"Add favorite"}">${x.fav?"★":"☆"}</button>
+      <button class="target" data-t="${x.id}">Target</button>
+    </div>
+  `).join("");
+
+  a.forEach(x=>{
+    $(`[data-c="${x.id}"]`).onclick=()=>{
+      x.done=!x.done; save(); render(); renderShopping();
+    };
+    $(`[data-e="${x.id}"]`).onclick=()=>edit(x.id);
+    $(`[data-s="${x.id}"]`).onclick=()=>{
+      x.fav=!x.fav; save(); render();
+    };
+    $(`[data-t="${x.id}"]`).onclick=()=>{
+      open("https://www.target.com/s?searchTerm="+encodeURIComponent(x.name),"_blank");
+    };
+  });
+
+  const done=l.items.filter(x=>x.done).length;
+  const total=l.items.length;
+  const spent=l.items.reduce((n,x)=>n+x.price*x.qty,0);
+
+  $("#stats").textContent=`${done} of ${total} items · $${spent.toFixed(2)}`;
+  $("#bar").style.width=total?done/total*100+"%":"0%";
+  $("#budget").value=l.budget||"";
+  $("#bt").textContent=`$${spent.toFixed(2)} / $${Number(l.budget||0).toFixed(2)}`;
+  $("#left").textContent=l.budget?`$${(l.budget-spent).toFixed(2)} left`:"";
+  $("#bb").style.width=l.budget?Math.min(100,spent/l.budget*100)+"%":"0%";
+
+  lists();
+  favs();
+  renderShopping();
+}
+
+function edit(i){
+  eid=i;
+  const x=cur().items.find(a=>a.id===i);
+  $("#en").value=x.name;
+  $("#ec").value=x.cat;
+  $("#eq").value=x.qty;
+  $("#ep").value=x.price;
+  $("#ea").value=x.aisle;
+  $("#note").value=x.note;
+  $("#fav").checked=x.fav;
+  $("#edit").showModal();
+}
+
+function lists(){
+  $("#listCards").innerHTML=S.lists.map(l=>`
+    <div class="listcard">
+      <button class="list-name" data-o="${l.id}" aria-label="Open ${esc(l.name)}">
+        <b>${esc(l.name)}</b>
+        <span class="meta">${l.items.filter(x=>!x.done).length} open · ${l.items.length} total</span>
+      </button>
+    </div>
+  `).join("");
+
+  document.querySelectorAll("[data-o]").forEach(b=>{
+    b.onclick=()=>{
+      S.current=b.dataset.o;
+      S.filter="all";
+      S.cat="All";
+      save();
+      view("shop");
+      render();
+    };
+  });
+}
+
+function favs(){
+  const f=S.lists.flatMap(l=>l.items.filter(x=>x.fav).map(x=>({...x,list:l.name})));
+  $("#favCards").innerHTML=f.length?
+    f.map(x=>`
+      <div class="listcard">
+        <div>
+          <b>${esc(x.name)}</b>
+          <div class="meta">${esc(x.list)} · ${esc(x.cat)}</div>
+        </div>
+        <button class="target" data-fav="${esc(x.name)}">Target</button>
+      </div>
+    `).join(""):
+    "<div class='card muted'>No favorites yet.<br>Tap ☆ beside an item to save it.</div>";
+
+  document.querySelectorAll("[data-fav]").forEach(b=>{
+    b.onclick=()=>open(
+      "https://www.target.com/s?searchTerm="+encodeURIComponent(b.dataset.fav),
+      "_blank"
+    );
+  });
+}
+
+function renderShopping(){
+  const l=cur();
+  const done=l.items.filter(x=>x.done).length;
+  const total=l.items.length;
+  const openItems=l.items.filter(x=>!x.done);
+
+  $("#shoppingTitle").textContent=l.name;
+  $("#shoppingProgress").textContent=`${done} of ${total} items complete`;
+  $("#shoppingTotal").textContent=`$${l.items.reduce((n,x)=>n+x.price*x.qty,0).toFixed(2)} estimated`;
+
+  const items=[...openItems,...l.items.filter(x=>x.done)];
+
+  $("#shoppingItems").innerHTML=items.length?items.map(x=>`
+    <div class="shopping-item ${x.done?"done":""}">
+      <button class="shopping-check" data-sc="${x.id}" aria-label="${x.done?"Mark open":"Mark done"}">
+        ${x.done?"✓":""}
+      </button>
+      <div class="shopping-main">
+        <button class="shopping-name" data-se="${x.id}">${esc(x.name)}</button>
+        <div class="shopping-meta">
+          ×${x.qty} · ${esc(x.cat)}
+          ${x.aisle?" · 📍 "+esc(x.aisle):""}
+          ${x.price?" · $"+(x.price*x.qty).toFixed(2):""}
+        </div>
+        ${x.note?`<div class="shopping-note">📝 ${esc(x.note)}</div>`:""}
+      </div>
+    </div>
+  `).join(""):"<div class='card muted'>Your list is empty. Add items in Shop mode.</div>";
+
+  document.querySelectorAll("[data-sc]").forEach(b=>{
+    b.onclick=()=>{
+      const x=cur().items.find(a=>a.id===b.dataset.sc);
+      x.done=!x.done;
+      save();
+      render();
+    };
+  });
+
+  document.querySelectorAll("[data-se]").forEach(b=>{
+    b.onclick=()=>edit(b.dataset.se);
+  });
+}
+
+function view(v){
+  document.querySelectorAll(".view").forEach(x=>x.classList.add("hidden"));
+  $("#"+v).classList.remove("hidden");
+  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.dataset.v===v));
+}
+
+$("#add").onclick=()=>{
+  add($("#item").value);
+  $("#item").value="";
+};
+
+$("#item").onkeydown=e=>{
+  if(e.key==="Enter")$("#add").click();
+};
+
+document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>add(b.dataset.add));
+
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
+  view(b.dataset.v);
+  if(b.dataset.v!=="shop" && b.dataset.v!=="shoppingMode") render();
+});
+
+document.querySelectorAll(".f").forEach(b=>b.onclick=()=>{
+  S.filter=b.dataset.f;
+  document.querySelectorAll(".f").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");
+  render();
+});
+
+$("#cat").onchange=e=>{
+  S.cat=e.target.value;
+  render();
+};
+
+$("#listName").onchange=e=>{
+  cur().name=e.target.value||"My Target Run";
+  save();
+  render();
+};
+
+$("#budget").onchange=e=>{
+  cur().budget=Number(e.target.value)||0;
+  save();
+  render();
+};
+
+$("#clear").onclick=()=>{
+  cur().items=cur().items.filter(x=>!x.done);
+  save();
+  render();
+};
+
+$("#share").onclick=async()=>{
+  const t=cur().name+"\n"+cur().items.map(x=>
+    `${x.done?"☑":"☐"} ${x.name} ×${x.qty}`
+  ).join("\n");
+  if(navigator.share) await navigator.share({title:cur().name,text:t});
+  else if(navigator.clipboard) await navigator.clipboard.writeText(t);
+};
+
+$("#newList").onclick=()=>{
+  const n=prompt("New list name","Weekly Target Run");
+  if(n){
+    S.lists.push({id:ID(),name:n,budget:0,items:[]});
+    S.current=S.lists.at(-1).id;
+    save();
+    render();
+  }
+};
+
+$("#dup").onclick=()=>{
+  const l=cur();
+  S.lists.push({
+    id:ID(),
+    name:l.name+" Copy",
+    budget:l.budget,
+    items:l.items.map(x=>({...x,id:ID(),done:false}))
+  });
+  S.current=S.lists.at(-1).id;
+  save();
+  render();
+};
+
+$("#save").onclick=()=>{
+  const x=cur().items.find(a=>a.id===eid);
+  Object.assign(x,{
+    name:$("#en").value.trim()||x.name,
+    cat:$("#ec").value,
+    qty:Math.max(1,Number($("#eq").value)||1),
+    price:Math.max(0,Number($("#ep").value)||0),
+    aisle:$("#ea").value.trim(),
+    note:$("#note").value.trim(),
+    fav:$("#fav").checked
+  });
+  save();
+  render();
+};
+
+$("#del").onclick=()=>{
+  cur().items=cur().items.filter(x=>x.id!==eid);
+  save();
+  render();
+};
+
+$("#mode").onclick=()=>{
+  view("shoppingMode");
+  renderShopping();
+};
+
+$("#exitMode").onclick=()=>{
+  view("shop");
+  render();
+};
+
+$("#defaultCat").value=S.defaultCat;
+$("#defaultCat").onchange=e=>{
+  S.defaultCat=e.target.value;
+  save();
+};
+
+$("#reset").onclick=()=>{
+  if(confirm("Reset all app data?")){
+    localStorage.removeItem(K);
+    location.reload();
+  }
+};
+
+if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
+
+render();

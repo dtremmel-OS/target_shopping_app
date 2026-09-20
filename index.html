@@ -1,12 +1,156 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#cc0000"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png"><link rel="stylesheet" href="styles.css"><title>Target Shopping Assistant</title></head><body>
-<header><div><small>TARGET RUN</small><h1>Shopping Assistant</h1></div><button id="newList">＋</button></header>
-<nav><button class="tab active" data-v="shop">Shop</button><button class="tab" data-v="lists">Lists</button><button class="tab" data-v="favorites">Favorites</button><button class="tab" data-v="settings">Settings</button></nav>
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#cc0000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+  <title>Target Shopping Assistant V2.1</title>
+</head>
+<body>
+<header>
+  <div><small>TARGET RUN</small><h1>Shopping Assistant</h1></div>
+  <button id="newList" aria-label="Create new list">＋</button>
+</header>
+
+<nav>
+  <button class="tab active" data-v="shop">Shop</button>
+  <button class="tab" data-v="lists">Lists</button>
+  <button class="tab" data-v="favorites">Favorites</button>
+  <button class="tab" data-v="settings">Settings</button>
+</nav>
+
 <main>
-<section id="shop" class="view"><div class="card"><div class="row"><input id="listName"><button id="share">Share</button></div><div class="progress"><i id="bar"></i></div><div class="stats"><span id="stats"></span><button id="clear">Clear done</button></div></div>
-<div class="card"><div class="add"><input id="item" placeholder="Add an item…"><button id="add">Add</button></div><div class="chips"><button data-add="Milk">Milk</button><button data-add="Eggs">Eggs</button><button data-add="Paper towels">Paper towels</button><button data-add="Laundry detergent">Laundry detergent</button></div></div>
-<div class="tools"><div class="seg"><button class="f active" data-f="all">All</button><button class="f" data-f="open">Open</button><button class="f" data-f="done">Done</button></div><select id="cat"><option>All</option><option>Grocery</option><option>Household</option><option>Personal Care</option><option>Beauty</option><option>Electronics</option><option>Pets</option><option>Other</option></select><button id="mode">🛒 Shopping mode</button></div><div id="items"></div>
-<div class="card budget"><b>Budget</b><span id="bt"></span><div class="progress"><i id="bb"></i></div><label>Budget $<input id="budget" type="number" step=".01" min="0"></label><strong id="left"></strong></div></section>
-<section id="lists" class="view hidden"><div class="head"><h2>My Lists</h2><button id="dup">Duplicate current</button></div><div id="listCards"></div></section>
-<section id="favorites" class="view hidden"><h2 class="head">Favorites</h2><div id="favCards"></div></section>
-<section id="settings" class="view hidden"><div class="card"><h2>Settings</h2><label>Default category<select id="defaultCat"><option>Grocery</option><option>Household</option><option>Personal Care</option><option>Beauty</option><option>Electronics</option><option>Pets</option><option>Other</option></select></label><button id="reset" class="danger">Reset app data</button><p class="muted">Data is stored locally on this device. Target buttons open Target search and do not store Target credentials.</p></div></section></main>
-<dialog id="edit"><form method="dialog"><h2>Edit item</h2><label>Name<input id="en"></label><label>Category<select id="ec"><option>Grocery</option><option>Household</option><option>Personal Care</option><option>Beauty</option><option>Electronics</option><option>Pets</option><option>Other</option></select></label><label>Quantity<input id="eq" type="number" min="1"></label><label>Price each<input id="ep" type="number" min="0" step=".01"></label><label>Aisle / location<input id="ea"></label><label>Note<input id="note"></label><label><input id="fav" type="checkbox"> Favorite / buy regularly</label><div class="actions"><button value="cancel">Cancel</button><button id="del" value="delete" class="danger">Delete</button><button id="save" value="save" class="primary">Save</button></div></form></dialog><script src="app.js"></script></body></html>
+  <section id="shop" class="view">
+    <div class="card">
+      <div class="row">
+        <input id="listName" aria-label="Current list name">
+        <button id="share">Share</button>
+      </div>
+      <div class="progress"><i id="bar"></i></div>
+      <div class="stats"><span id="stats"></span><button id="clear">Clear done</button></div>
+    </div>
+
+    <div class="card">
+      <div class="add">
+        <input id="item" placeholder="Add an item…" aria-label="New item">
+        <button id="add">Add</button>
+      </div>
+      <div class="chips">
+        <button data-add="Milk">Milk</button>
+        <button data-add="Eggs">Eggs</button>
+        <button data-add="Paper towels">Paper towels</button>
+        <button data-add="Laundry detergent">Laundry detergent</button>
+      </div>
+    </div>
+
+    <div class="tools">
+      <div class="seg">
+        <button class="f active" data-f="all">All</button>
+        <button class="f" data-f="open">Open</button>
+        <button class="f" data-f="done">Done</button>
+      </div>
+      <select id="cat" aria-label="Filter by category">
+        <option>All</option>
+        <option>Grocery</option>
+        <option>Household</option>
+        <option>Personal Care</option>
+        <option>Beauty</option>
+        <option>Electronics</option>
+        <option>Pets</option>
+        <option>Other</option>
+      </select>
+      <button id="mode">🛒 Shopping mode</button>
+    </div>
+
+    <div id="items"></div>
+
+    <div class="card budget">
+      <b>Budget</b>
+      <span id="bt"></span>
+      <div class="progress"><i id="bb"></i></div>
+      <label>Budget $<input id="budget" type="number" step=".01" min="0"></label>
+      <strong id="left"></strong>
+    </div>
+  </section>
+
+  <section id="shoppingMode" class="view hidden">
+    <div class="shopping-header card">
+      <div>
+        <small>SHOPPING MODE</small>
+        <h2 id="shoppingTitle">My Target Run</h2>
+      </div>
+      <button id="exitMode">Done</button>
+    </div>
+    <div class="card shopping-summary">
+      <strong id="shoppingProgress"></strong>
+      <span id="shoppingTotal"></span>
+    </div>
+    <div id="shoppingItems"></div>
+  </section>
+
+  <section id="lists" class="view hidden">
+    <div class="head"><h2>My Lists</h2><button id="dup">Duplicate current</button></div>
+    <div id="listCards"></div>
+  </section>
+
+  <section id="favorites" class="view hidden">
+    <h2 class="head">Favorites</h2>
+    <div id="favCards"></div>
+  </section>
+
+  <section id="settings" class="view hidden">
+    <div class="card">
+      <h2>Settings</h2>
+      <label>Default category
+        <select id="defaultCat">
+          <option>Grocery</option>
+          <option>Household</option>
+          <option>Personal Care</option>
+          <option>Beauty</option>
+          <option>Electronics</option>
+          <option>Pets</option>
+          <option>Other</option>
+        </select>
+      </label>
+      <button id="reset" class="danger">Reset app data</button>
+      <p class="muted">Data is stored locally on this device.<br>
+      Target buttons open Target search and do not store Target credentials.</p>
+    </div>
+  </section>
+</main>
+
+<dialog id="edit">
+  <form method="dialog">
+    <h2>Edit item</h2>
+    <label>Name<input id="en"></label>
+    <label>Category
+      <select id="ec">
+        <option>Grocery</option>
+        <option>Household</option>
+        <option>Personal Care</option>
+        <option>Beauty</option>
+        <option>Electronics</option>
+        <option>Pets</option>
+        <option>Other</option>
+      </select>
+    </label>
+    <label>Quantity<input id="eq" type="number" min="1"></label>
+    <label>Price each<input id="ep" type="number" min="0" step=".01"></label>
+    <label>Aisle / location<input id="ea"></label>
+    <label>Note<input id="note"></label>
+    <label><input id="fav" type="checkbox"> Favorite / buy regularly</label>
+    <div class="actions">
+      <button value="cancel">Cancel</button>
+      <button id="del" value="delete" class="danger">Delete</button>
+      <button id="save" value="save" class="primary">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="app.js"></script>
+</body>
+</html>
