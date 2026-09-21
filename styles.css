@@ -2,16 +2,9 @@
 
 /* V2.3 refinements */
 .outline-action{background:#fff!important;color:#c00!important;border:1px solid #c00!important;border-radius:10px!important;padding:10px 13px!important;font-weight:900!important}
-.favorite-check{display:flex!important;align-items:center;gap:6px}
-.favorite-check input{display:none!important}
-.star-check{font-size:24px;line-height:1;color:#c00}
-.favorite-check:has(input:checked) .star-check{font-size:0}
-.favorite-check:has(input:checked) .star-check:before{content:"★";font-size:24px}
 .target-btn{background:#c00!important;color:#fff!important;border:0!important;border-radius:10px!important;padding:9px 11px!important;font-weight:800!important}
 .target-logo{display:inline-block!important;width:19px!important;height:19px!important;border-radius:50%!important;border:3px solid #fff!important;position:relative!important;flex:0 0 auto!important}
 .target-logo:after{content:""!important;position:absolute!important;left:3px!important;top:3px!important;width:7px!important;height:7px!important;border-radius:50%!important;background:#fff!important}
-.favorite-removal-actions{flex-wrap:wrap}
-.favorite-removal-actions button{flex:1 1 100%}
 @media (max-width:560px){
   .target-btn{width:40px!important;height:40px!important;padding:8px!important;justify-content:center!important}
   .target-logo{width:22px!important;height:22px!important;border-width:3px!important}
@@ -19,3 +12,9 @@
   .target-btn span:last-child{display:none!important}
   dialog{overflow:auto}
 }
+.favorite-status{display:flex;align-items:center;gap:7px;font-weight:800;margin:12px 0;color:#555}
+.favorite-status span{font-size:24px;line-height:1;color:#aaa}
+.favorite-status span.active{color:#c00}
+.status-star{cursor:default;pointer-events:none;color:#c00!important;font-size:18px!important;display:inline-flex;align-items:center;justify-content:center}
+.item-delete{border:0;background:#f3f3f3;color:#777;border-radius:9px;width:30px;height:30px;font-size:20px;line-height:1;font-weight:700}
+.hidden{display:none!important}
