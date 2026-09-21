@@ -29,4 +29,28 @@ $("#share").onclick=async()=>{let t=cur().name+"\n"+cur().items.map(x=>`${x.done
 function createList(){let n=prompt("New list name","Weekly Target Run");if(n){S.lists.push({id:ID(),name:n,budget:0,items:[]});S.current=S.lists.at(-1).id;save();render()}}$("#newList").onclick=createList;$("#newListFromLists").onclick=createList;$("#duplicateCurrent").onclick=()=>duplicate(S.current);$("#deleteCurrent").onclick=()=>askDelete(S.current);$("#mode").onclick=()=>{shoppingFilter="all";document.querySelectorAll(".sf").forEach(x=>x.classList.toggle("active",x.dataset.sf==="all"));view("shoppingMode");renderShopping()};$("#exitMode").onclick=()=>{view("shop");render()};
 $("#addFavorite").onclick=()=>{picker();$("#favoritePicker").showModal()};$("#createFavorite").onclick=()=>editFav();$("#saveFavorite").onclick=()=>{let d={name:$("#fn").value.trim(),cat:$("#fc").value,qty:Math.max(1,Number($("#fq").value)||1),price:Math.max(0,Number($("#fp").value)||0),aisle:$("#fa").value.trim(),note:$("#fnote").value.trim()};if(!d.name)return;if(favName)updateFav(favName,d);else cur().items.push({...d,id:ID(),done:false,fav:true});save();render()};
 $("#menuEdit").onclick=()=>{let id=menuId;$("#listMenu").close();rename(id)};$("#menuDuplicate").onclick=()=>{let id=menuId;$("#listMenu").close();duplicate(id)};$("#menuDelete").onclick=()=>{let id=menuId;$("#listMenu").close();askDelete(id)};$("#confirmDeleteButton").onclick=()=>{let id=deleteId;deleteId=null;delList(id)};
-$("#save").onclick=()=>{let x=cur().items.find(a=>a.id===eid);Object.assign(x,{name:$("#en").value.trim()||x.name,cat:$("#ec").value,qty:Math.max(1,Number($("#eq").value)||1),price:Math.max(0,Number($("#ep").value)||0),aisle:$("#ea").value.trim(),note:$("#note").value.trim(),fav:$("#fav").checked});save();render()};$("#del").onclick=()=>{cur().items=cur().items.filter(x=>x.id!==eid);save();render()};$("#defaultCat").value=S.defaultCat;$("#defaultCat").onchange=e=>{S.defaultCat=e.target.value;save()};$("#currency").value=S.currency;$("#currency").onchange=e=>{S.currency=e.target.value;save();render()};$("#reset").onclick=()=>{if(confirm("Reset all app data?")){localStorage.removeItem(K);location.reload()}};if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");render();
+$("#save").onclick=()=>{let x=cur().items.find(a=>a.id===eid);Object.assign(x,{name:$("#en").value.trim()||x.name,cat:$("#ec").value,qty:Math.max(1,Number($("#eq").value)||1),price:Math.max(0,Number($("#ep").value)||0),aisle:$("#ea").value.trim(),note:$("#note").value.trim(),fav:$("#fav").checked});save();render()};$("#del").onclick=()=>{cur().items=cur().items.filter(x=>x.id!==eid);save();render()};$("#deleteFavorite").onclick=()=>{
+  if(!favoriteEditId)return;
+  deleteFavoriteEverywhere(favoriteEditId);
+  favoriteEditId=null;
+  save(); render();
+};
+
+$("#removeCurrentOnly").onclick=()=>{
+  if(removalFavoriteName){
+    const x=cur().items.find(a=>a.id===removalItemId);
+    if(x)x.fav=false;
+    removalFavoriteName=null; removalItemId=null;
+    save(); render();
+  }
+};
+
+$("#removeEverywhere").onclick=()=>{
+  if(removalFavoriteName){
+    deleteFavoriteEverywhere(removalFavoriteName);
+    removalFavoriteName=null; removalItemId=null;
+    save(); render();
+  }
+};
+
+$("#defaultCat").value=S.defaultCat;$("#defaultCat").onchange=e=>{S.defaultCat=e.target.value;save()};$("#currency").value=S.currency;$("#currency").onchange=e=>{S.currency=e.target.value;save();render()};$("#reset").onclick=()=>{if(confirm("Reset all app data?")){localStorage.removeItem(K);location.reload()}};if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");render();
